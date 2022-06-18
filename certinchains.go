@@ -3,20 +3,23 @@ package main
 import (
 	"crypto/tls"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 )
 
-func main() {
+func getChain(url string) {
 	tran := &(*http.DefaultTransport.(*http.Transport)) // make shallow copy
 	tran.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	client := &http.Client{
 		Timeout:   time.Second * 30,
 		Transport: tran,
 	}
-	req, err := http.NewRequest("GET", "https://www.trsice.cz", nil)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Println(err)
 		return
@@ -40,4 +43,51 @@ func main() {
 			fmt.Printf("=========================================\n")
 		}
 	}
+}
+
+func apiHandler(w http.ResponseWriter, r *http.Request, trimPath string) {
+	route := trimPath[5:8]
+	switch route {
+	case "url":
+		apiEndpointHandler(w, r)
+	default:
+		handleErr(w, errors.New("API routing error."))
+	}
+}
+
+func apiEndpointHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
+	switch r.Method {
+	case "GET":
+		query := r.URL.Query()
+		urlString := query.Get("url")
+		fmt.Fprintf(w, urlString)
+	}
+}
+
+func handleErr(w http.ResponseWriter, err error) {
+	log.Println(err)
+	http.Error(w, "Server error.", http.StatusInternalServerError)
+}
+
+func main() {
+	getChain("https://www.trsice.cz")
+	// First command line argument is context path, e.g. "certinchains/"
+	http.HandleFunc("/"+os.Args[1], func(w http.ResponseWriter, r *http.Request) {
+		route := "index.html"
+		trimPath := strings.ReplaceAll(r.URL.Path, os.Args[1], "")
+		if len(trimPath) > 2 {
+			route = trimPath[1:4]
+		}
+		switch route {
+		case "api":
+			apiHandler(w, r, trimPath)
+		default:
+			path := "public/" + trimPath[1:]
+			log.Println(path)
+			http.ServeFile(w, r, path)
+		}
+	})
+	// Second command line argument is port.
+	log.Fatal(http.ListenAndServe(":"+os.Args[2], nil))
 }
