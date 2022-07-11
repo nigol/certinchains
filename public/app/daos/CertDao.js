@@ -1,12 +1,12 @@
 /*jshint esversion: 6 */
 
-export class HelpDao {
+export class CertDao {
     constructor() {
         this.baseUrl = window.location.href;
     }
 
-    getHelpData(onSuccess, onError) {
-        fetch(this.baseUrl + `help/help.md`, {
+    getCertData(onSuccess, onError, url) {
+        fetch(this.baseUrl + `/api/url?url=${url}`, {
             method: "GET",
             headers: {
                 "Content-type": "text/plain",
@@ -14,6 +14,6 @@ export class HelpDao {
         })
         .then((response) => response.text())
         .then(text => onSuccess(text))
-        .catch((error) => onError("Error reading help file." + error));
+        .catch((error) => onError("Error reading cert data."));
     }
 }

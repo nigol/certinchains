@@ -1,11 +1,13 @@
 /*jshint esversion: 6 */
 
 import {MainController} from "./controllers/MainController.js";
-import {CertService} from "./services/CertService.js";
+import {CertDao} from "./daos/CertDao.js";
+import {HelpDao} from "./daos/HelpDao.js";
 
 export const sessionScope = {
     "mainController": new MainController(),
-    "certService": new CertService()
+    "certDao": new CertDao(),
+    "helpDao": new HelpDao()
 };
 
 export function inject(key) {

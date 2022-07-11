@@ -8,7 +8,9 @@ function CertPart() {
     return `
         <div class="certPart">
             <div>
-                <input type="text" id="filter" placeholder="Type an URL.">
+                <input type="text" id="url" 
+                    placeholder="Type an URL." 
+                    onkeyup=mainController.onUrlChanged()>
                 </input>
                 <button onclick=mainController.showCerts()>
                     Show
