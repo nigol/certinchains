@@ -6,7 +6,7 @@ export class MainController {
     constructor() {
         this.message = "Starting application.";
         this.url = "";
-        this.chain = "";
+        this.chain = "No data to display.";
         this.help = false;
     }
 
@@ -25,6 +25,7 @@ export class MainController {
         const error = (error) => {
             this.message = `Error retrieving chain for ${this.url}.`;
             update("#message");
+            this.chain = "No data to display.";
             this.refreshDisplay();
         };
         this.certDao.getCertData(success, error, this.url);
@@ -33,11 +34,14 @@ export class MainController {
     onUrlChanged() {
         const event = window.event;
         this.url = event.target.value;
-        console.log(this.url);
     }
 
     refreshDisplay() {
-        console.log(this.chain);
+        update("#certPart");
+    }
+
+    getChain() {
+        return this.chain;
     }
 
     isHelp() {

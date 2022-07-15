@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func getChain(url string) {
+func getChain(w http.ResponseWriter, url string) {
 	tran := &(*http.DefaultTransport.(*http.Transport)) // make shallow copy
 	tran.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	client := &http.Client{
@@ -33,14 +33,14 @@ func getChain(url string) {
 		certs := resp.TLS.PeerCertificates
 		for _, cert := range certs {
 			certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw})
-			fmt.Printf("Issuer Name: %s\n", cert.Issuer)
-			fmt.Printf("Subject: %s\n", cert.Subject)
-			fmt.Printf("Expiry: %s \n", cert.NotAfter)
-			fmt.Printf("Common Name: %s \n", cert.Issuer.CommonName)
-			fmt.Printf("Signature: %X \n", cert.Signature)
-			fmt.Printf("Signature Algorithm: %s \n", cert.SignatureAlgorithm)
-			fmt.Printf("PEM certificate: \n%s\n", certPEM)
-			fmt.Printf("=========================================\n")
+			fmt.Fprintf(w, "Issuer Name: %s\n", cert.Issuer)
+			fmt.Fprintf(w, "Subject: %s\n", cert.Subject)
+			fmt.Fprintf(w, "Expiry: %s \n", cert.NotAfter)
+			fmt.Fprintf(w, "Common Name: %s \n", cert.Issuer.CommonName)
+			fmt.Fprintf(w, "Signature: %X \n", cert.Signature)
+			fmt.Fprintf(w, "Signature Algorithm: %s \n", cert.SignatureAlgorithm)
+			fmt.Fprintf(w, "PEM certificate: \n%s\n", certPEM)
+			fmt.Fprintf(w, "=========================================\n")
 		}
 	}
 }
@@ -61,7 +61,7 @@ func apiEndpointHandler(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		query := r.URL.Query()
 		urlString := query.Get("url")
-		fmt.Fprintf(w, urlString)
+		getChain(w, urlString)
 	}
 }
 
@@ -71,7 +71,6 @@ func handleErr(w http.ResponseWriter, err error) {
 }
 
 func main() {
-	getChain("https://www.trsice.cz")
 	// First command line argument is context path, e.g. "certinchains/"
 	http.HandleFunc("/"+os.Args[1], func(w http.ResponseWriter, r *http.Request) {
 		route := "index.html"

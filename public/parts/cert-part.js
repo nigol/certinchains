@@ -12,13 +12,25 @@ function CertPart() {
                     placeholder="Type an URL." 
                     onkeyup=mainController.onUrlChanged()>
                 </input>
+            </div>
+
+            <div>
                 <button onclick=mainController.showCerts()>
                     Show
                 </button>
+            </div>
+
+            <div>
                 <button onclick=mainController.showHelp()>
                     ?
                 </button>
             </div>
+        </div>
+
+        <div style="max-width: 100%; overflow: auto">
+            <pre>
+${mainController.getChain()}
+            </pre>
         </div>
 
     `;
